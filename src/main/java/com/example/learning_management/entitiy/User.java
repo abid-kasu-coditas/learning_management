@@ -19,7 +19,7 @@ public class User {
     private Long id;
 
     @Column(name = "full_name",nullable = false)
-    private String fullName;
+    private String username;
 
     @Column(name = "email",nullable = false)
     private String email;
@@ -30,7 +30,5 @@ public class User {
     @Column(name = "role",nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
-
-
 
 }

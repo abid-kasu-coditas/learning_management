@@ -1,16 +1,17 @@
 package com.example.learning_management.entitiy;
 
+import com.example.learning_management.enums.Grade;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "learning_progress")
+@Table(name = "assignment_submissions")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LearningProgress {
+public class AssignmentSubmission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +24,13 @@ public class LearningProgress {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "grade")
+    @Enumerated(EnumType.STRING)
+    private Grade grade;
+
+    @Column(name = "pass_status")
+    @Builder.Default
+    boolean pass = false;
+
 }

@@ -1,5 +1,6 @@
 package com.example.learning_management.entitiy;
 
+import com.example.learning_management.enums.CourseStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,6 +26,9 @@ public class Course {
 
     @Column(name = "description",nullable = false)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
 
     @OneToMany(mappedBy = "course",cascade = CascadeType.ALL,orphanRemoval = true)
     @Builder.Default

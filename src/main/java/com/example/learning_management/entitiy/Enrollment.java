@@ -1,26 +1,32 @@
 package com.example.learning_management.entitiy;
 
+import com.example.learning_management.enums.EnrollmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "learning_progress")
+@Table(name = "enrollments")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LearningProgress {
+public class Enrollment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assignment_id")
-    private Assignment assignment;
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private EnrollmentStatus status;
+
 }

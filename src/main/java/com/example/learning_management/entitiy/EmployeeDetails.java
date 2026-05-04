@@ -1,11 +1,13 @@
 package com.example.learning_management.entitiy;
 
+
+import com.example.learning_management.enums.Department;
 import com.example.learning_management.enums.EmployeeStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table
+@Table(name = "employee_details")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,9 +25,13 @@ public class EmployeeDetails {
     private User user;
 
     @Column(name = "department",nullable = false)
-    private String department;
+    @Enumerated(EnumType.STRING)
+    private Department department;
 
     @Enumerated(EnumType.STRING)
     private EmployeeStatus status;
+
+
+
 
 }
