@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CourseMapper {
 
-    @Mapping(target = "totalLectures", expression = "java(course.getLectures.size())")
+    @Mapping(target = "totalLectures", expression = "java(course.getLectures().size())")
     CourseResponse toResponse(Course course);
 
     List<CourseResponse> toResponseList(List<Course> courses);

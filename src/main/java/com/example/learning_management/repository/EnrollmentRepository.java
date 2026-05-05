@@ -3,6 +3,11 @@ package com.example.learning_management.repository;
 import com.example.learning_management.entitiy.Enrollment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface EnrollmentRepository extends JpaRepository<Enrollment,Long> {
+import java.util.List;
 
+public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
+
+    boolean existsByUserIdAndCourseId(Long userId, Long courseId);
+
+    List<Enrollment> findByUserId(Long userId);
 }

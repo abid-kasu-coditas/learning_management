@@ -40,6 +40,7 @@ public class CourseServiceImpl implements CourseService {
     public CourseResponse addLecture(CreateLectureRequest request) {
 
         Course course = courseRepository.findById(request.getCourseId()).orElseThrow(() -> new RuntimeException("ADD EXCEPTION HERE"));
+
         Lecture lecture = Lecture.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
