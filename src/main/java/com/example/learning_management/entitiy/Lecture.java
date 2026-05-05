@@ -16,16 +16,16 @@ public class Lecture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id",nullable = false,updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
-    @Column(name = "title",nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description",nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "resource_type",nullable = false)
+    @Column(name = "resource_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
 
@@ -37,4 +37,5 @@ public class Lecture {
     @JoinColumn(name = "course_id")
     private Course course;
 
+    
 }
