@@ -3,6 +3,8 @@ package com.example.learning_management.entitiy;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "certificates")
 @Getter
@@ -24,5 +26,8 @@ public class Certificate {
     @JoinColumn(name = "course_id")
     private Course course;
 
+    @Column(name = "issued_at",nullable = false)
+    @Builder.Default
+    private LocalDate issuedAt = LocalDate.now();
 
 }

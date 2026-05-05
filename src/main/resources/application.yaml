@@ -14,3 +14,9 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
+
+app:
+  jwt:
+    secret: "bXkgbmFtZSBpcyBhYmlkIGFuZCBpIGFtIG1ha2luZyBqYXZhIHByb2plY3Q="
+    access-token-expiration: 900000
+    refreh-token-expiration: 604800000

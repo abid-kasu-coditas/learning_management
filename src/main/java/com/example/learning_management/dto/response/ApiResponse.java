@@ -1,24 +1,31 @@
 package com.example.learning_management.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.OrderBy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
     private boolean success;
+
     private String message;
+
     private T data;
+
     private List<String> errors;
 
-    public static <T> ApiResponse<T> success(String message,T data){
+    public static <T> ApiResponse<T> success(String message, T data) {
+
         return ApiResponse.<T>builder()
                 .success(true)
                 .message(message)
@@ -26,24 +33,26 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> success(String message){
+    public static <T> ApiResponse<T> success(String message) {
+
         return ApiResponse.<T>builder()
                 .success(true)
                 .message(message)
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(String message,List<String> errors){
+    public static <T> ApiResponse<T> error(String message) {
+
         return ApiResponse.<T>builder()
                 .success(false)
                 .message(message)
-                .errors(errors)
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(String message){
+    public static <T> ApiResponse<T> error(String message, List<String> errors) {
+
         return ApiResponse.<T>builder()
-                .success(false)
+                .success(true)
                 .message(message)
                 .build();
     }

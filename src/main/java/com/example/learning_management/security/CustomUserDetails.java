@@ -1,13 +1,17 @@
 package com.example.learning_management.security;
 
 import com.example.learning_management.entitiy.User;
-import lombok.*;
- import org.springframework.security.core.GrantedAuthority;
+import com.example.learning_management.enums.Role;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @RequiredArgsConstructor
@@ -18,24 +22,39 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        return List.of(new SimpleGrantedAuthority("ROLE_"+user.getRole().name()));
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
+        if (user.getRole() == Role.ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
+        }
+        return authorities;
     }
 
     @Override
-     public String getPassword() {
+    public String getPassword() {
+
         return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-         return user.getEmail();
+
+        return user.getEmail();
     }
 
     @Override
     public boolean isAccountNonExpired() {
+
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+
         return true;
 
-     }
+    }
 
     @Override
     public boolean isCredentialsNonExpired() {
@@ -48,9 +67,4 @@ public class CustomUserDetails implements UserDetails {
 
         return true;
     }
-  @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
 }
