@@ -2,7 +2,6 @@ package com.example.learning_management.service;
 
 import com.example.learning_management.entitiy.RefreshToken;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 public interface RefreshTokenService {
@@ -14,4 +13,5 @@ public interface RefreshTokenService {
     Optional<RefreshToken> findByToken(String token);
 
     void deleteByUserId(Long userId);
+
 }
