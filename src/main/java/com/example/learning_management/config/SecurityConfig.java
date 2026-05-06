@@ -1,6 +1,6 @@
 package com.example.learning_management.config;
 
-import com.example.learning_management.security.CustomUserDetails;
+import com.example.learning_management.constants.SecurityConstants;
 import com.example.learning_management.security.CustomerUserDetailsService;
 import com.example.learning_management.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(SecurityConstants.PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

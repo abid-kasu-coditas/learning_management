@@ -8,7 +8,9 @@ import com.example.learning_management.dto.response.RegisterResponse;
 import com.example.learning_management.entitiy.RefreshToken;
 import com.example.learning_management.entitiy.User;
 import com.example.learning_management.enums.Role;
-import com.example.learning_management.exception.ErrorConstants;
+import com.example.learning_management.constants.ExceptionConstants;
+import com.example.learning_management.exception.AlreadyExistException;
+import com.example.learning_management.exception.AuthenticationException;
 import com.example.learning_management.repository.UserRepository;
 import com.example.learning_management.security.CustomUserDetails;
 import com.example.learning_management.security.JwtService;
@@ -20,9 +22,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -43,61 +46,48 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
-
         if (userRepository.existsByEmail(request.getEmail())) {
-//            throw exception here
+            throw new AlreadyExistException(ExceptionConstants.USER_ALREADY_EXISTS_EMAIL + request.getEmail());
         }
-        User user = User.builder()
+        User userToSave = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.EMPLOYEE)
                 .build();
 
-        User saved = userRepository.save(user);
+        User savedUser = userRepository.save(userToSave);
         return RegisterResponse.builder()
-                .username(saved.getUsername())
-                .email(saved.getEmail())
+                .username(savedUser.getUsername())
+                .email(savedUser.getEmail())
                 .build();
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
-
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UsernameNotFoundException(ErrorConstants.USER_NOT_FOUND_EMAIL + request.getEmail()));
-
+        authenticate(request.getEmail(), request.getPassword());
+        User user = findUserByEmail(request.getEmail());
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
         String accessToken = jwtService.generateAccessToken(customUserDetails);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-
         return buildAuthResponse(accessToken, refreshToken.getToken(), user);
-
-
     }
 
     @Override
     public AuthResponse refreshToken(RefreshTokenRequest request) {
-
-        RefreshToken refreshToken = refreshTokenService.findByToken(request.getRefreshToken()).orElseThrow(() -> new RuntimeException("TOKEN NOT FOUND"));
-
+        RefreshToken refreshToken = refreshTokenService.findByToken(request.getRefreshToken())
+                .orElseThrow(() -> new AuthenticationException(ExceptionConstants.REFRESH_TOKEN_NOT_FOUND));
         refreshTokenService.verifyExpiration(refreshToken);
-
         User user = refreshToken.getUser();
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
         String newAccessToken = jwtService.generateAccessToken(customUserDetails);
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
-
         return buildAuthResponse(newAccessToken, newRefreshToken.getToken(), user);
-
-
     }
 
     @Override
     public void logout(Long userId) {
-
         refreshTokenService.deleteByUserId(userId);
-
     }
 
     private AuthResponse buildAuthResponse(String accessToken, String refreshToken, User user) {
@@ -114,13 +104,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public String getLoggedInEmployee() {
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null
+                && authentication.isAuthenticated()
+                && !Objects.equals(authentication.getName(), "anonymousUser")) {
             return authentication.getName();
         }
-        return "ddfd";
+        throw new AuthenticationException("No authenticated user found in security context");
     }
 
+    private void authenticate(String email, String password) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthenticationException(ExceptionConstants.USER_NOT_FOUND_EMAIL + email));
+    }
 }

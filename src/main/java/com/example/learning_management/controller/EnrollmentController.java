@@ -1,11 +1,10 @@
 package com.example.learning_management.controller;
 
 import com.example.learning_management.dto.request.EnrollmentRequest;
-import com.example.learning_management.dto.response.ApiResponse;
+import com.example.learning_management.dto.response.ApplicationResponse;
 import com.example.learning_management.dto.response.EnrollmentResponse;
 import com.example.learning_management.security.CustomUserDetails;
 import com.example.learning_management.service.EnrollmentService;
-import jakarta.persistence.Entity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,18 +24,18 @@ public class EnrollmentController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ResponseEntity<ApiResponse<EnrollmentResponse>> enroll(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody EnrollmentRequest request) {
-
+    public ResponseEntity<ApplicationResponse<EnrollmentResponse>> enroll(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody EnrollmentRequest request) {
         Long userId = userDetails.getUser().getId();
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Enrolled in course successfully", enrollmentService.enrollInCourse(userId, request.getCourseId())));
+        EnrollmentResponse response = enrollmentService.enrollInCourse(userId, request.getCourseId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApplicationResponse<>(response));
     }
 
     @GetMapping("/my")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ResponseEntity<ApiResponse<List<EnrollmentResponse>>> getMyEnrollments(@AuthenticationPrincipal CustomUserDetails userDetails) {
-
+    public ResponseEntity<ApplicationResponse<List<EnrollmentResponse>>> getMyEnrollments(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUser().getId();
-        return ResponseEntity.ok(ApiResponse.success("Enrollments retrieved successfully", enrollmentService.getAllEnrolledCourses(userId)));
+        List<EnrollmentResponse> response = enrollmentService.getAllEnrolledCourses(userId);
+        return ResponseEntity.ok(new ApplicationResponse<>(response));
     }
 
 

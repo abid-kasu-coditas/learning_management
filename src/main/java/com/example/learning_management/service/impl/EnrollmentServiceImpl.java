@@ -1,11 +1,13 @@
 package com.example.learning_management.service.impl;
 
-import com.example.learning_management.dto.request.EnrollmentRequest;
 import com.example.learning_management.dto.response.EnrollmentResponse;
+import com.example.learning_management.constants.ExceptionConstants;
 import com.example.learning_management.entitiy.Course;
 import com.example.learning_management.entitiy.Enrollment;
 import com.example.learning_management.entitiy.User;
 import com.example.learning_management.enums.EnrollmentStatus;
+import com.example.learning_management.exception.AlreadyExistException;
+import com.example.learning_management.exception.ResourceNotFoundException;
 import com.example.learning_management.mapper.EnrollmentMapper;
 import com.example.learning_management.repository.CourseRepository;
 import com.example.learning_management.repository.EnrollmentRepository;
@@ -30,12 +32,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public EnrollmentResponse enrollInCourse(Long userId, Long courseId) {
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("exception occured"));
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("exception occurred"));
+        User user = getUserByIdOrThrow(userId);
+        Course course = getCourseByIdOrThrow(courseId);
 
         if (enrollmentRepository.existsByUserIdAndCourseId(userId, courseId)) {
-//            THROW AN EXCEPTION
+            throw new AlreadyExistException(ExceptionConstants.ENROLLMENT_ALREADY_EXISTS);
         }
 
         Enrollment enrollment = Enrollment.builder()
@@ -43,15 +44,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .user(user)
                 .status(EnrollmentStatus.ENROLLED)
                 .build();
-
-
         return enrollmentMapper.toResponse(enrollmentRepository.save(enrollment));
     }
 
     @Override
     public List<EnrollmentResponse> getAllEnrolledCourses(Long userId) {
-
         return enrollmentMapper.toResponseList(enrollmentRepository.findByUserId(userId));
+    }
 
+    private User getUserByIdOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.USER_NOT_FOUND + userId));
+    }
+
+    private Course getCourseByIdOrThrow(Long courseId) {
+        return courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + courseId));
     }
 }

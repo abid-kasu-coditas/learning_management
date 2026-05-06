@@ -2,19 +2,22 @@ package com.example.learning_management.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class JwtService {
+
+    private static final String ACCESS_TOKEN_TYPE = "access";
 
     @Value("${app.jwt.secret}")
     private String secretKey;
@@ -26,12 +29,11 @@ public class JwtService {
 
     public String generateAccessToken(UserDetails userDetails) {
 
-        return Jwts.builder()
-                .subject(userDetails.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                .signWith(getSigningKey())
-                .compact();
+        List<String> roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        return generateTokenInternal(userDetails.getUsername(), roles, accessTokenExpiration, ACCESS_TOKEN_TYPE);
     }
 
 //    TOKEN VALIDATION
@@ -55,6 +57,11 @@ public class JwtService {
         return claims.getSubject();
     }
 
+    public String extractType(String token) {
+
+        return extractAllClaims(token).get("type", String.class);
+    }
+
     public Date extractExpiration(String token) {
 
         Claims claims = extractAllClaims(token);
@@ -71,11 +78,23 @@ public class JwtService {
                 .getPayload();
     }
 
+    private String generateTokenInternal(String username, List<String> roles, long expirationTime, String type) {
+
+        return Jwts.builder()
+                .subject(username)
+                .claim("roles", roles)
+                .claim("type", type)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
 
     //    KEY HANDLING
     private SecretKey getSigningKey() {
 
-        byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
+        byte[] keyBytes = secretKey.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

@@ -3,8 +3,9 @@ package com.example.learning_management.controller;
 import com.example.learning_management.dto.request.LoginRequest;
 import com.example.learning_management.dto.request.RefreshTokenRequest;
 import com.example.learning_management.dto.request.RegisterRequest;
-import com.example.learning_management.dto.response.ApiResponse;
+import com.example.learning_management.dto.response.ApplicationResponse;
 import com.example.learning_management.dto.response.AuthResponse;
+import com.example.learning_management.dto.response.GeneralResponse;
 import com.example.learning_management.dto.response.RegisterResponse;
 import com.example.learning_management.security.CustomUserDetails;
 import com.example.learning_management.service.AuthService;
@@ -26,34 +27,27 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
-
-        RegisterResponse authResponse = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Registration Successfull", authResponse));
+    public ResponseEntity<ApplicationResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        RegisterResponse response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApplicationResponse<>(response));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
-
-        AuthResponse authResponse = authService.login(request);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Login Successfull", authResponse));
-
+    public ResponseEntity<ApplicationResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApplicationResponse<>(response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody RefreshTokenRequest request) {
-
-        AuthResponse authResponse = authService.refreshToken(request);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Token generated", authResponse));
-
+    public ResponseEntity<ApplicationResponse<AuthResponse>> login(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse response = authService.refreshToken(request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApplicationResponse<>(response));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-
+    public ResponseEntity<ApplicationResponse<GeneralResponse>> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         authService.logout(customUserDetails.getUser().getId());
-        return ResponseEntity.ok(ApiResponse.success("Logged out successfully"));
-
+        return ResponseEntity.ok(new ApplicationResponse<>(new GeneralResponse("Logged out successfully")));
     }
 
 }

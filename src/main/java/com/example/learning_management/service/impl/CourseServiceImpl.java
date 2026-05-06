@@ -3,15 +3,16 @@ package com.example.learning_management.service.impl;
 import com.example.learning_management.dto.request.CreateCourseRequest;
 import com.example.learning_management.dto.request.CreateLectureRequest;
 import com.example.learning_management.dto.response.CourseResponse;
+import com.example.learning_management.constants.ExceptionConstants;
 import com.example.learning_management.entitiy.Course;
 import com.example.learning_management.entitiy.Lecture;
+import com.example.learning_management.exception.ResourceNotFoundException;
 import com.example.learning_management.mapper.CourseMapper;
 import com.example.learning_management.repository.CourseRepository;
 import com.example.learning_management.repository.LectureRepository;
 import com.example.learning_management.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -28,18 +29,16 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseResponse createCourse(CreateCourseRequest request) {
-
-        Course course = Course.builder()
+        Course courseToSave = Course.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .build();
-        return courseMapper.toResponse(courseRepository.save(course));
+        return courseMapper.toResponse(courseRepository.save(courseToSave));
     }
 
     @Override
     public CourseResponse addLecture(CreateLectureRequest request) {
-
-        Course course = courseRepository.findById(request.getCourseId()).orElseThrow(() -> new RuntimeException("ADD EXCEPTION HERE"));
+        Course course = getCourseByIdOrThrow(request.getCourseId());
 
         Lecture lecture = Lecture.builder()
                 .title(request.getTitle())
@@ -55,14 +54,16 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseResponse> getAllCourses() {
-
         return courseMapper.toResponseList(courseRepository.findAll());
-
     }
 
     @Override
     public CourseResponse getCourseById(Long courseId) {
+        return courseMapper.toResponse(getCourseByIdOrThrow(courseId));
+    }
 
-        return courseRepository.findById(courseId).map(courseMapper::toResponse).orElseThrow(() -> new RuntimeException());
+    private Course getCourseByIdOrThrow(Long courseId) {
+        return courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + courseId));
     }
 }

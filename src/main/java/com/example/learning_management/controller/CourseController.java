@@ -2,7 +2,7 @@ package com.example.learning_management.controller;
 
 import com.example.learning_management.dto.request.CreateCourseRequest;
 import com.example.learning_management.dto.request.CreateLectureRequest;
-import com.example.learning_management.dto.response.ApiResponse;
+import com.example.learning_management.dto.response.ApplicationResponse;
 import com.example.learning_management.dto.response.CourseResponse;
 import com.example.learning_management.service.CourseService;
 import jakarta.validation.Valid;
@@ -21,29 +21,31 @@ public class CourseController {
     private final CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CourseResponse>> createCourse(@Valid @RequestBody CreateCourseRequest createCourseRequest) {
+    public ResponseEntity<ApplicationResponse<CourseResponse>> createCourse(@Valid @RequestBody CreateCourseRequest createCourseRequest) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Course Created Sucessfully", courseService.createCourse(createCourseRequest)));
-
+        CourseResponse response = courseService.createCourse(createCourseRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApplicationResponse<>(response));
     }
 
     @PostMapping("/lectures")
-    public ResponseEntity<ApiResponse<CourseResponse>> addLectures(@Valid @RequestBody CreateLectureRequest request) {
+    public ResponseEntity<ApplicationResponse<CourseResponse>> addLectures(@Valid @RequestBody CreateLectureRequest request) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Course Added Sucessfully", courseService.addLecture(request)));
-
+        CourseResponse response = courseService.addLecture(request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApplicationResponse<>(response));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CourseResponse>>> getAllCourses() {
+    public ResponseEntity<ApplicationResponse<List<CourseResponse>>> getAllCourses() {
 
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Courses Retrieved Sucessfully", courseService.getAllCourses()));
-
+        List<CourseResponse> response = courseService.getAllCourses();
+        return ResponseEntity.status(HttpStatus.OK).body(new ApplicationResponse<>(response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CourseResponse>> getCourseById(@PathVariable Long id) {
+    public ResponseEntity<ApplicationResponse<CourseResponse>> getCourseById(@PathVariable Long id) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Course Retrived Sucessfully", courseService.getCourseById(id)));
+        CourseResponse response = courseService.getCourseById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApplicationResponse<>(response));
     }
+
 }
