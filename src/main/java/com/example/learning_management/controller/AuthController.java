@@ -7,6 +7,7 @@ import com.example.learning_management.dto.response.ApplicationResponse;
 import com.example.learning_management.dto.response.AuthResponse;
 import com.example.learning_management.dto.response.GeneralResponse;
 import com.example.learning_management.dto.response.RegisterResponse;
+import com.example.learning_management.exception.AuthenticationException;
 import com.example.learning_management.security.CustomUserDetails;
 import com.example.learning_management.service.AuthService;
 import jakarta.validation.Valid;
@@ -28,24 +29,31 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApplicationResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
+
         RegisterResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApplicationResponse<>(response));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApplicationResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+
         AuthResponse response = authService.login(request);
         return ResponseEntity.status(HttpStatus.OK).body(new ApplicationResponse<>(response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApplicationResponse<AuthResponse>> login(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<ApplicationResponse<AuthResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.status(HttpStatus.OK).body(new ApplicationResponse<>(response));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<ApplicationResponse<GeneralResponse>> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        if (customUserDetails == null || customUserDetails.getUser() == null) {
+            throw new AuthenticationException("Unauthorized");
+        }
         authService.logout(customUserDetails.getUser().getId());
         return ResponseEntity.ok(new ApplicationResponse<>(new GeneralResponse("Logged out successfully")));
     }

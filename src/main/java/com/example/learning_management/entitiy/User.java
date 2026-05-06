@@ -15,20 +15,23 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id",nullable = false,updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
-    @Column(name = "full_name",nullable = false)
+    @Column(name = "full_name", nullable = false)
     private String username;
 
-    @Column(name = "email",nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "password",nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "role",nullable = false)
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private EmployeeDetails employeeDetails;
 
 }
