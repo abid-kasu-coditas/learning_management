@@ -10,7 +10,7 @@ import com.example.learning_management.entitiy.User;
 
 public interface AuthService {
 
-    RegisterResponse register(RegisterRequest request) throws IllegalAccessException;
+    RegisterResponse register(RegisterRequest request) ;
 
     AuthResponse login(LoginRequest request);
 

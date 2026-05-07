@@ -12,7 +12,7 @@ public interface CourseService {
 
     CourseResponse addLecture(CreateLectureRequest request);
 
-    List<CourseResponse> getAllCourses();
+    List<CourseResponse> getAllCourses(int page, int size, String sortBy);
 
     CourseResponse getCourseById(Long courseId);
 }

@@ -32,8 +32,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public EnrollmentResponse enrollInCourse(Long userId, Long courseId) {
-        User user = getUserByIdOrThrow(userId);
-        Course course = getCourseByIdOrThrow(courseId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.USER_NOT_FOUND + userId));
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + courseId));
 
         if (enrollmentRepository.existsByUserIdAndCourseId(userId, courseId)) {
             throw new AlreadyExistException(ExceptionConstants.ENROLLMENT_ALREADY_EXISTS);
@@ -52,13 +54,4 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         return enrollmentMapper.toResponseList(enrollmentRepository.findByUserId(userId));
     }
 
-    private User getUserByIdOrThrow(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.USER_NOT_FOUND + userId));
-    }
-
-    private Course getCourseByIdOrThrow(Long courseId) {
-        return courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + courseId));
-    }
 }

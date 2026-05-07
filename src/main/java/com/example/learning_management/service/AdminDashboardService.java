@@ -1,18 +1,18 @@
 package com.example.learning_management.service;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         z
-import com.example.learning_management.dto.response.EmployeeProgressResponse;
+
+import com.example.learning_management.entitiy.EmployeeDetails;
 
 import java.util.List;
 
 public interface AdminDashboardService {
 
-    List<EmployeeProgressResponse> getEmployeeOnBenchAndNotEnrolled();
+    List<EmployeeDetails> getEmployeeOnBenchAndNotEnrolled();
 
-    List<EmployeeProgressResponse> getEmployeeOnBenchAndEnrolled();
+    List<EmployeeDetails> getEmployeeOnBenchAndEnrolled();
 
-    List<EmployeeProgressResponse> getEmployeeOffBenchAndNotEnrolled();
+    List<EmployeeDetails> getEmployeeOffBenchAndNotEnrolled();
 
-    List<EmployeeProgressResponse> getEmployeeOffBenchAndEnrolled();
+    List<EmployeeDetails> getEmployeeOffBenchAndEnrolled();
 
 
 }

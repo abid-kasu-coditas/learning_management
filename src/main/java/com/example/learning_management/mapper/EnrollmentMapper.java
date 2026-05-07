@@ -12,6 +12,8 @@ public interface EnrollmentMapper {
 
     @Mapping(source = "course.id", target = "courseId")
     @Mapping(source = "course.title", target = "courseTitle")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "enrolledAt", target = "enrolledAt")
     EnrollmentResponse toResponse(Enrollment enrollment);
 
 

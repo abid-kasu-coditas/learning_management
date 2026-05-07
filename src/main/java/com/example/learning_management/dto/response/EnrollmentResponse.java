@@ -19,10 +19,10 @@ public class EnrollmentResponse {
 
     private Long courseId;
 
-    private Long courseTitle;
+    private String courseTitle;
 
-    private EnrollmentStatus enrollmentStatus;
+    private EnrollmentStatus status;
 
-    private LocalDateTime enrolled_at;
+    private LocalDateTime enrolledAt;
 
 }

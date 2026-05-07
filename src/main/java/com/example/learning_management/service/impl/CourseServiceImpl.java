@@ -13,6 +13,10 @@ import com.example.learning_management.repository.LectureRepository;
 import com.example.learning_management.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -38,7 +42,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseResponse addLecture(CreateLectureRequest request) {
-        Course course = getCourseByIdOrThrow(request.getCourseId());
+        Course course =courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + request.getCourseId()));;
 
         Lecture lecture = Lecture.builder()
                 .title(request.getTitle())
@@ -46,6 +51,7 @@ public class CourseServiceImpl implements CourseService {
                 .resourceType(request.getResourceType())
                 .course(course)
                 .build();
+
         lectureRepository.save(lecture);
 
         course.getLectures().add(lecture);
@@ -53,17 +59,20 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseResponse> getAllCourses() {
-        return courseMapper.toResponseList(courseRepository.findAll());
-    }
+    public List<CourseResponse> getAllCourses(int page, int size, String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
+
+        Page<Course> coursePage = courseRepository.findAll(pageable);
+
+        return courseMapper.toResponseList(coursePage.getContent());
+     }
 
     @Override
     public CourseResponse getCourseById(Long courseId) {
-        return courseMapper.toResponse(getCourseByIdOrThrow(courseId));
+      Course course =  courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + courseId));
+        return courseMapper.toResponse(course);
     }
 
-    private Course getCourseByIdOrThrow(Long courseId) {
-        return courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + courseId));
-    }
 }

@@ -37,26 +37,34 @@ public class LearningProgressImpl {
 
     public GeneralResponse startLecture(Long lectureId) {
 
-        Lecture lecture = getLectureByIdOrThrow(lectureId);
-        User user = getAuthenticatedUser();
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.LECTURE_NOT_FOUND + lectureId));
+
+        String email = authService.getLoggedInEmployee();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthenticationException(ExceptionConstants.USER_NOT_FOUND_EMAIL + email));
 
         LearningProgress progress = learningProgressRepository.findByLectureAndUser(lecture, user)
                 .orElseGet(() -> LearningProgress.builder()
                         .lecture(lecture)
                         .user(user)
+                        .completed(false)
+                        .completedAt(null)
                         .build());
 
-        progress.setCompleted(false);
-        progress.setCompletedAt(null);
         learningProgressRepository.save(progress);
-
         return new GeneralResponse(LECTURE_STARTED_MESSAGE);
     }
 
     public GeneralResponse completeLecture(Long lectureId) {
 
-        Lecture lecture = getLectureByIdOrThrow(lectureId);
-        User user = getAuthenticatedUser();
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.LECTURE_NOT_FOUND + lectureId));
+        String email = authService.getLoggedInEmployee();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthenticationException(ExceptionConstants.USER_NOT_FOUND_EMAIL + email));
 
         LearningProgress progress = learningProgressRepository.findByLectureAndUser(lecture, user)
                 .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.LEARNING_PROGRESS_NOT_FOUND));
@@ -72,10 +80,14 @@ public class LearningProgressImpl {
 
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.COURSE_NOT_FOUND + courseId));
 
-        Long totalLectures = (long) (course.getLectures() == null ? 0 : course.getLectures().size());
-        Long completedLectures = learningProgressRepository.countCompletedLectures(userId, courseId);
+        long totalLectures = (long) (course.getLectures() == null ? 0 : course.getLectures().size());
+        long completedLectures = learningProgressRepository.countCompletedLectures(userId, courseId);
+        Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found for user id: " + userId + " and course id: " + courseId));
 
-        Long completedPercentage = (completedLectures / totalLectures) * 100;
+        Long completedPercentage = totalLectures == 0
+                ? 0L
+                : (completedLectures * 100) / totalLectures;
 
         return CourseProgressResponse.builder()
                 .id(courseId)
@@ -83,22 +95,10 @@ public class LearningProgressImpl {
                 .totalLectures(totalLectures)
                 .completedLectures(completedLectures)
                 .completePercentage(completedPercentage)
-                .enrollmentStatus(enrollmentRepository.findByUserIdAndCourseId(userId, courseId).get().getStatus())
+                .enrollmentStatus(enrollment.getStatus())
                 .build();
 
 
     }
 
-    private Lecture getLectureByIdOrThrow(Long lectureId) {
-
-        return lectureRepository.findById(lectureId)
-                .orElseThrow(() -> new ResourceNotFoundException(ExceptionConstants.LECTURE_NOT_FOUND + lectureId));
-    }
-
-    private User getAuthenticatedUser() {
-
-        String email = authService.getLoggedInEmployee();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthenticationException(ExceptionConstants.USER_NOT_FOUND_EMAIL + email));
-    }
 }

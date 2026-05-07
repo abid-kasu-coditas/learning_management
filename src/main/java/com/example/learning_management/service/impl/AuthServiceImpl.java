@@ -26,8 +26,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -46,37 +44,48 @@ public class AuthServiceImpl implements AuthService {
     private long accessTokenExpiration;
 
     @Override
-    public RegisterResponse register(RegisterRequest request) throws IllegalAccessException {
+    public RegisterResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new AlreadyExistException(ExceptionConstants.USER_ALREADY_EXISTS_EMAIL + request.getEmail());
         }
-        User userToSave = User.builder().username(request.getUsername()).email(request.getEmail()).password(passwordEncoder.encode(request.getPassword())).role(Role.valueOf(request.getRole())).build();
+        Role role = Role.valueOf(request.getRole());
+        User userToSave = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(role)
+                .build();
 
-        if (request.getRole().equals(Role.EMPLOYEE.name())) {
-
+        if (role == Role.EMPLOYEE) {
             if (request.getDepartment() == null || request.getStatus() == null) {
-                throw new IllegalAccessException(ExceptionConstants.NOT_CORRECT_BODY);
+                throw new IllegalArgumentException(ExceptionConstants.NOT_CORRECT_BODY);
             }
-
-            EmployeeDetails employeeDetails = EmployeeDetails.builder().department(request.getDepartment()).status(request.getStatus()).user(userToSave).build();
-
+            EmployeeDetails employeeDetails = EmployeeDetails.builder()
+                    .department(request.getDepartment())
+                    .status(request.getStatus())
+                    .user(userToSave)
+                    .build();
             userToSave.setEmployeeDetails(employeeDetails);
         }
 
         User savedUser = userRepository.save(userToSave);
-        return RegisterResponse.builder().username(savedUser.getUsername()).email(savedUser.getEmail()).role(String.valueOf(savedUser.getRole())).build();
+        return RegisterResponse.builder()
+                .username(savedUser.getUsername())
+                .email(savedUser.getEmail())
+                .role(savedUser.getRole().name())
+                .build();
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        authenticate(request.getEmail(), request.getPassword());
-        User user = findUserByEmail(request.getEmail());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        User user =userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AuthenticationException(ExceptionConstants.USER_NOT_FOUND_EMAIL + request.getEmail()));
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
         String accessToken = jwtService.generateAccessToken(customUserDetails);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-        return buildAuthResponse(accessToken, refreshToken.getToken(), user);
+        return toAuthResponse(accessToken, refreshToken.getToken(), user);
     }
 
     @Override
@@ -88,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
         String newAccessToken = jwtService.generateAccessToken(customUserDetails);
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
-        return buildAuthResponse(newAccessToken, newRefreshToken.getToken(), user);
+        return toAuthResponse(newAccessToken, newRefreshToken.getToken(), user);
     }
 
     @Override
@@ -97,27 +106,25 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenService.deleteByUserId(userId);
     }
 
-    private AuthResponse buildAuthResponse(String accessToken, String refreshToken, User user) {
+    private AuthResponse toAuthResponse(String accessToken, String refreshToken, User user) {
 
-        return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).tokenType("Bearer").expiresIn(accessTokenExpiration).userId(user.getId()).email(user.getEmail()).role(user.getRole().name()).build();
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(accessTokenExpiration)
+                .userId(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .build();
     }
 
     public String getLoggedInEmployee() {
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             return authentication.getName();
         }
-        throw new AuthenticationException("No authenticated user found in security context");
+        throw new AuthenticationException("User is not found");
     }
 
-    private void authenticate(String email, String password) {
-
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-    }
-
-    private User findUserByEmail(String email) {
-
-        return userRepository.findByEmail(email).orElseThrow(() -> new AuthenticationException(ExceptionConstants.USER_NOT_FOUND_EMAIL + email));
-    }
 }

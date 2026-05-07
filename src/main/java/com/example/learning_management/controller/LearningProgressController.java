@@ -20,7 +20,7 @@ public class LearningProgressController {
     public ResponseEntity<ApplicationResponse<GeneralResponse>> startLecture(@PathVariable Long lectureId) {
 
         GeneralResponse response = learningProgressService.startLecture(lectureId);
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity   .status(HttpStatus.OK)
                 .body(new ApplicationResponse<>(response));
     }
 

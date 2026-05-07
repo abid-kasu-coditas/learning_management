@@ -1,7 +1,7 @@
 package com.example.learning_management.service.impl;
 
-import com.example.learning_management.dto.response.EmployeeProgressResponse;
 import com.example.learning_management.entitiy.EmployeeDetails;
+import com.example.learning_management.enums.EmployeeStatus;
 import com.example.learning_management.repository.EmployeeDetailRepository;
 import com.example.learning_management.service.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
@@ -13,28 +13,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminDashboardImpl implements AdminDashboardService {
 
-    private EmployeeDetailRepository employeeDetailRepository;
+    private final EmployeeDetailRepository employeeDetailRepository;
 
     @Override
-    public List<EmployeeProgressResponse> getEmployeeOnBenchAndNotEnrolled() {
-
-
+    public List<EmployeeDetails> getEmployeeOnBenchAndNotEnrolled() {
+        return employeeDetailRepository.findBenchEmployeesNotEnrolled(EmployeeStatus.ON_BENCH);
     }
 
     @Override
-    public List<EmployeeProgressResponse> getEmployeeOnBenchAndEnrolled() {
-
+    public List<EmployeeDetails> getEmployeeOnBenchAndEnrolled() {
+        return employeeDetailRepository.findBenchEmployeesEnrolled(EmployeeStatus.ON_BENCH);
     }
 
     @Override
-    public List<EmployeeProgressResponse> getEmployeeOffBenchAndNotEnrolled() {
-
-        return List.of();
+    public List<EmployeeDetails> getEmployeeOffBenchAndNotEnrolled() {
+        return employeeDetailRepository.findBenchEmployeesNotEnrolled(EmployeeStatus.ON_PROJECT);
     }
 
     @Override
-    public List<EmployeeProgressResponse> getEmployeeOffBenchAndEnrolled() {
-
-        return List.of();
+    public List<EmployeeDetails> getEmployeeOffBenchAndEnrolled() {
+        return employeeDetailRepository.findBenchEmployeesEnrolled(EmployeeStatus.ON_PROJECT);
     }
 }

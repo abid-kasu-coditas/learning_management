@@ -21,10 +21,10 @@ public class EmployeeProgressResponse {
 
     private EmployeeStatus employeeStatus;
     
-    private int totalEnrollments;
+    private long totalEnrollments;
 
-    private int completedCourse;
+    private long completedCourse;
 
-    private int certificationIssued;
+    private long certificationIssued;
 
 }

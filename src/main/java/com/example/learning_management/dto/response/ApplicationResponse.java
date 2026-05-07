@@ -10,18 +10,10 @@ import java.util.List;
 public class ApplicationResponse<T> {
 
     private T data;
-    private List<ErrorResponse> errors;
 
     public ApplicationResponse(T data) {
         this.data = data;
     }
 
-    public ApplicationResponse(List<ErrorResponse> errors) {
-        this.errors = errors;
-    }
 
-    public ApplicationResponse(T data, List<ErrorResponse> errors) {
-        this.data = data;
-        this.errors = errors;
-    }
 }

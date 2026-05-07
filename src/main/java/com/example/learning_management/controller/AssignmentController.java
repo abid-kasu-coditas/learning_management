@@ -31,7 +31,9 @@ public class AssignmentController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<ApplicationResponse<AssignmentSubmissionResponse>> submitAssignment(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody AssignmentSubmissionRequest request) {
+            @Valid @RequestBody AssignmentSubmissionRequest request)
+    {
+
         Long userId = userDetails.getUser().getId();
         AssignmentSubmissionResponse response = assignmentService.submitAssignment(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApplicationResponse<>(response));
@@ -42,6 +44,7 @@ public class AssignmentController {
     public ResponseEntity<ApplicationResponse<AssignmentSubmissionResponse>> gradeSubmission(
             @PathVariable Long submissionId,
             @Valid @RequestBody GradeSubmissionRequest request) {
+
         AssignmentSubmissionResponse response = assignmentService.gradeSubmission(submissionId, request);
         return ResponseEntity.ok(new ApplicationResponse<>(response));
     }
@@ -51,6 +54,7 @@ public class AssignmentController {
     public ResponseEntity<ApplicationResponse<AssignmentSubmissionResponse>> getMySubmission(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody SubmissionLookupRequest request) {
+
         Long userId = userDetails.getUser().getId();
         AssignmentSubmissionResponse response = assignmentService.getSubmission(userId, request);
         return ResponseEntity.ok(new ApplicationResponse<>(response));

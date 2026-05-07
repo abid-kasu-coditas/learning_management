@@ -1,6 +1,7 @@
 package com.example.learning_management.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EnrollmentRequest {
 
-    @NotBlank(message = "course is required")
-    private Long courseId;
+    @NotNull(message = "courseId is required")
+     private Long courseId;
 
 }
